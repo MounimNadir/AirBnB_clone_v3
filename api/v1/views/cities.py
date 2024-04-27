@@ -8,7 +8,8 @@ from models.state import State
 from flask import abort, request, jsonify
 
 
-@app_views.route("/states/<state_id>/cities", strict_slashes=False, methods=["GET"])
+@app_views.route("/states/<state_id>/cities",
+                 strict_slashes=False, methods=["GET"])
 def get_cities_by_state(state_id=None):
     """Retrieve list of all City objects of a State"""
     state = storage.get(State, state_id)
@@ -18,7 +19,8 @@ def get_cities_by_state(state_id=None):
     return jsonify(cities)
 
 
-@app_views.route("/cities/<city_id>", strict_slashes=False, methods=["GET"])
+@app_views.route("/cities/<city_id>",
+                 strict_slashes=False, methods=["GET"])
 def get_city(city_id=None):
     """Retrieve a City object"""
     city = storage.get(City, city_id)
@@ -27,7 +29,8 @@ def get_city(city_id=None):
     return jsonify(city.to_dict())
 
 
-@app_views.route("cities/<city_id>", strict_slashes=False,
+@app_views.route("cities/<city_id>",
+                 strict_slashes=False,
                  methods=["DELETE"])
 def city_delete(city_id):
     """delete method"""
@@ -39,7 +42,8 @@ def city_delete(city_id):
     return jsonify({}), 200
 
 
-@app_views.route("/states/<state_id>/cities", strict_slashes=False, methods=["POST"])
+@app_views.route("/states/<state_id>/cities",
+                 strict_slashes=False, methods=["POST"])
 def create_city():
     """create a new post req"""
     data = request.get_json(force=True, silent=True)
@@ -52,7 +56,8 @@ def create_city():
     return jsonify(new_city.to_dict()), 201
 
 
-@app_views.route("/cities/<city_id>", strict_slashes=False, methods=["PUT"])
+@app_views.route("/cities/<city_id>",
+                 strict_slashes=False, methods=["PUT"])
 def update_city(city_id):
     """update city"""
     obj = storage.get(City, city_id)
