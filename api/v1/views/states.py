@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+"""State objects that handle all default RESTful API actions"""
+
 from flask import abort, request, jsonify
 from models import storage
 from models.state import State
