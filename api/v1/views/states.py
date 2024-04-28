@@ -6,9 +6,14 @@ from models import storage
 from models.state import State
 from api.v1.views import app_views
 
+# Define constants for error messages
+ERROR_JSON_NOT_FOUND = "No JSON data found"
+ERROR_MISSING_NAME = "Name field is missing"
+ERROR_STATE_NOT_FOUND = "State not found"
 
-@app_views.route("/states",
-                 methods=["GET"], strict_slashes=False)
+
+@app_views.route("/states", methods=["GET"],
+                 strict_slashes=False)
 def get_states():
     """Retrieve all State objects"""
     states = storage.all(State).values()
@@ -21,7 +26,7 @@ def get_state(state_id):
     """Retrieve a specific State object"""
     state = storage.get(State, state_id)
     if state is None:
-        abort(404)
+        abort(404, ERROR_STATE_NOT_FOUND)
     return jsonify(state.to_dict())
 
 
@@ -31,7 +36,7 @@ def delete_state(state_id):
     """Delete a State object"""
     state = storage.get(State, state_id)
     if state is None:
-        abort(404)
+        abort(404, ERROR_STATE_NOT_FOUND)
     storage.delete(state)
     storage.save()
     return jsonify({}), 200
@@ -43,10 +48,10 @@ def create_state():
     """Create a new State object"""
     data = request.get_json()
     if not data:
-        abort(400, "Not a JSON")
-    if "name" not in data:
-        abort(400, "Missing name")
-    new_state = State(**data)
+        abort(400, ERROR_JSON_NOT_FOUND)
+    if "name" not in data or not data["name"]:
+        abort(400, ERROR_MISSING_NAME)
+    new_state = State(name=data["name"])
     storage.new(new_state)
     storage.save()
     return jsonify(new_state.to_dict()), 201
@@ -58,13 +63,14 @@ def update_state(state_id):
     """Update an existing State object"""
     state = storage.get(State, state_id)
     if state is None:
-        abort(404)
+        abort(404, ERROR_STATE_NOT_FOUND)
     data = request.get_json()
     if not data:
-        abort(400, "Not a JSON")
-    for key in ['id', 'created_at', 'updated_at']:
-        data.pop(key, None)
+        abort(400, ERROR_JSON_NOT_FOUND)
+    # Define which fields can be updated
+    allowed_fields = ["name"]
     for key, value in data.items():
-        setattr(state, key, value)
+        if key in allowed_fields:
+            setattr(state, key, value)
     storage.save()
     return jsonify(state.to_dict()), 200
