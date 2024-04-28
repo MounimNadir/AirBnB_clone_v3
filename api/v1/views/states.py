@@ -6,7 +6,7 @@ from models import storage
 from models.state import State
 from api.v1.views import app_views
 
-# Define constants for error messages
+# constants for error messages
 ERROR_JSON_NOT_FOUND = "No JSON data found"
 ERROR_MISSING_NAME = "Name field is missing"
 ERROR_STATE_NOT_FOUND = "State not found"
@@ -20,13 +20,12 @@ def get_states():
     return jsonify([state.to_dict() for state in states])
 
 
-@app_views.route("/states/<state_id>",
-                 methods=["GET"], strict_slashes=False)
+@app_views.route("/states/<state_id>", methods=["GET"], strict_slashes=False)
 def get_state(state_id):
     """Retrieve a specific State object"""
     state = storage.get(State, state_id)
     if state is None:
-        abort(404, ERROR_STATE_NOT_FOUND)
+        return jsonify({"error": "Not found"}), 404
     return jsonify(state.to_dict())
 
 
@@ -67,7 +66,6 @@ def update_state(state_id):
     data = request.get_json()
     if not data:
         abort(400, ERROR_JSON_NOT_FOUND)
-    # Define which fields can be updated
     allowed_fields = ["name"]
     for key, value in data.items():
         if key in allowed_fields:
