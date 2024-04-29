@@ -4,6 +4,7 @@ Contains the class DBStorage
 """
 
 import models
+import hashlib  # For password hashing
 from models.amenity import Amenity
 from models.base_model import BaseModel, Base
 from models.city import City
@@ -21,7 +22,7 @@ classes = {"Amenity": Amenity, "City": City,
 
 
 class DBStorage:
-    """interaacts with the MySQL database"""
+    """interacts with the MySQL database"""
     __engine = None
     __session = None
 
@@ -49,7 +50,7 @@ class DBStorage:
                 for obj in objs:
                     key = obj.__class__.__name__ + '.' + obj.id
                     new_dict[key] = obj
-        return (new_dict)
+        return new_dict
 
     def new(self, obj):
         """add the object to the current database session"""
@@ -74,7 +75,7 @@ class DBStorage:
     def close(self):
         """call remove() method on the private session attribute"""
         self.__session.remove()
-    
+
     def get(self, cls, id):
         """query on the current database session"""
         if cls:
@@ -90,3 +91,8 @@ class DBStorage:
         else:
             count = len(self.all())
         return count
+
+    def update_password(self, obj):
+        """Hashes the user's password before updating"""
+        if isinstance(obj, User) and hasattr(obj, 'password') and obj.password:
+            obj.password = hashlib.md5(obj.password.encode()).hexdigest()

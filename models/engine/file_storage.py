@@ -4,6 +4,7 @@ Contains the FileStorage class
 """
 
 import json
+import hashlib  # For password hashing
 from models.amenity import Amenity
 from models.base_model import BaseModel
 from models.city import City
@@ -44,7 +45,11 @@ class FileStorage:
         """serializes __objects to the JSON file (path: __file_path)"""
         json_objects = {}
         for key in self.__objects:
-            json_objects[key] = self.__objects[key].to_dict()
+            # Exclude password key by default
+            obj_dict = self.__objects[key].to_dict()
+            if 'password' in obj_dict:
+                del obj_dict['password']
+            json_objects[key] = obj_dict
         with open(self.__file_path, 'w') as f:
             json.dump(json_objects, f)
 
@@ -54,7 +59,11 @@ class FileStorage:
             with open(self.__file_path, 'r') as f:
                 jo = json.load(f)
             for key in jo:
-                self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
+                # Include password key when used by FileStorage
+                obj_data = jo[key]
+                if 'password' in obj_data:
+                    obj_data['password'] = hashlib.md5(obj_data['password'].encode()).hexdigest()
+                self.__objects[key] = classes[obj_data["__class__"]](**obj_data)
         except Exception:
             pass
 
